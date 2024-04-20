@@ -8,7 +8,7 @@ import sys
 
 class HandleNode(object):
     
-    def __init__(self,m=7,node=Node("0.0.0.0",1234)) -> None:
+    def __init__(self,m=7,node=Node("0.0.0.0",1235)) -> None:
         self.node=node
         self.m=m
         self.requestHandler = RequestHandler()
@@ -334,7 +334,6 @@ class HandleNode(object):
 
 ip = "127.0.0.1"
 
-# This if statement is used to check if the node joining is the first node of the ring or not
 
 if len(sys.argv) == 3:
     print("JOINING RING")
