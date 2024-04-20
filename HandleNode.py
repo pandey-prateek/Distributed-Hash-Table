@@ -136,4 +136,54 @@ class HandleNode(object):
         thread_for_fix_finger = threading.Thread(target=  self.fix_fingers)
         thread_for_fix_finger.start()
 
-        
+    
+    def find_predecessor(self, search_id):
+        '''
+        The find_predecessor function provides the predecessor of any value in the ring given its id.
+        '''
+        if search_id == self.id:
+            return str(self.nodeinfo)
+        # print("finding pred for id ", search_id)
+        if self.predecessor is not None and  self.successor.id == self.id:
+            return self.nodeinfo.__str__()
+        if self.get_forward_distance(self.successor.id) > self.get_forward_distance(search_id):
+            return self.nodeinfo.__str__()
+        else:
+            new_node_hop = self.closest_preceding_node(search_id)
+            # print("new node hop finding hops in find predecessor" , new_node_hop.nodeinfo.__str__() )
+            if new_node_hop is None:
+                return "None"
+            ip, port = self.get_ip_port(new_node_hop.nodeinfo.__str__())
+            if ip == self.ip and port == self.port:
+                return self.nodeinfo.__str__()
+            data = self.request_handler.send_message(ip , port, "find_predecessor|"+str(search_id))
+            return data
+
+    def find_successor(self, search_id):
+        '''
+        The find_successor function provides the successor of any value in the ring given its id.
+        '''
+        if(search_id == self.id):
+            return str(self.nodeinfo)
+        # print("finding succ for id ", search_id)
+        predecessor = self.find_predecessor(search_id)
+        # print("predcessor found is ", predecessor)
+        if(predecessor == "None"):
+            return "None"
+        ip,port = self.get_ip_port(predecessor)
+        # print(ip ,port , "in find successor, data of predecesor")
+        data = self.request_handler.send_message(ip , port, "get_successor")
+        return data
+    def closest_preceding_node(self, search_id):
+        closest_node = None
+        min_distance = pow(2,m)+1
+        for i in list(reversed(range(m))):
+            # print("checking hops" ,i ,self.finger_table.table[i][1])
+            if  self.finger_table.table[i][1] is not None and self.get_forward_distance_2nodes(self.finger_table.table[i][1].id,search_id) < min_distance  :
+                closest_node = self.finger_table.table[i][1]
+                min_distance = self.get_forward_distance_2nodes(self.finger_table.table[i][1].id,search_id)
+                # print("Min distance",min_distance)
+
+        return closest_node
+
+
