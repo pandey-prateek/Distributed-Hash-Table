@@ -28,7 +28,7 @@ class Node(object):
     def find_predecessor(self, id):
         n = self.id
         while not(n < id <= n.successor):
-            n = n.closest_preceding_finger(id)
+            n = self.closest_preceding_finger(id)
         return n
     
     def closest_preceding_finger(self, id):
@@ -37,3 +37,27 @@ class Node(object):
             if self.id < n.id < id:
                 return n
         return self
+
+    def get_successor(self):
+        '''
+        This function is used to return the successor of the node
+        '''
+        if self.successor is None:
+            return "None"
+        return self.successor.__str__()
+    
+    def get_predecessor(self):
+        '''
+        This function is used to return the predecessor of the node
+
+        '''
+        if self.predecessor is None:
+            return "None"
+        return self.predecessor.__str__()
+    
+    def get_id(self):
+        '''
+        This function is used to return the id of the node
+
+        '''
+        return str(self.id)
