@@ -1,4 +1,4 @@
-## Chord Protocol - A Distributed Hash Table
+# Chord Protocol - A Distributed Hash Table
 ____________________
 
 CHORD is a simple Peer to Peer protocol which implements a Distributed Hash Table detailed as per the paper - [Stoica, Ion, Robert Morris, David Karger, M. Frans Kaashoek, and Hari Balakrishnan. "Chord: A scalable peer-to-peer lookup service for internet applications." ACM SIGCOMM Computer Communication Review 31, no. 4 (2001): 149-160.](https://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf)
@@ -88,9 +88,9 @@ To join the CHORD ring, the following commands are used:
 The client program operates through a menu-driven interface. It requires the user to input the port number of the node to which the client wants to connect. The client can then select an option from the menu for tasks such as insert, search, delete, and so on.
 
 
-# Class Structure
+## Class Structure
 
-## Node
+### Node
 - Responsible for representing a node in the CHORD network.
 - Attributes:
   - `id`: ID of the node.
@@ -100,7 +100,7 @@ The client program operates through a menu-driven interface. It requires the use
   - `data_store`: Data store for storing key-value pairs.
 
 
-## DataStore
+### DataStore
 - Responsible for managing the data stored by the nodes.
 - Attributes:
   - `data`: Data store to store key-value pairs.
@@ -109,13 +109,13 @@ The client program operates through a menu-driven interface. It requires the use
   - `search(key)`: Method for searching for a key in the data store.
   - `delete(key)`: Method for deleting a key from the data store.
 
-## FingerTable
+### FingerTable
 - Responsible for representing the finger table of a node.
 - Attributes:
   - `table`: List of finger table entries.
 
 
-## HandleNode
+### HandleNode
 - Responsible for handling the joining of new nodes into the CHORD network.
 - Methods:
     - `process_request()` process request at node
@@ -128,8 +128,14 @@ The client program operates through a menu-driven interface. It requires the use
         
 
 
-## RequestHandler
+### RequestHandler
 - Responsible for handling requests from clients to perform operations on the CHORD network.
 - Methods:
   - `send_message()`: Method for handling requests.
+
+## External Libraries
+
+``` bash 
+pip install prettytable
+```
 
