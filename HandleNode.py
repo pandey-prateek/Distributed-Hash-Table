@@ -40,11 +40,11 @@ class HandleNode(object):
         
         if operation == "find_predecessor":
             # print("finding predecessor")
-            result = self.node.find_predecessor(int(args[0]))
+            result = self.find_predecessor(int(args[0]))
 
         if operation == "find_successor":
             # print("finding successor")
-            result = self.node.find_successor(int(args[0]))
+            result = self.find_successor(int(args[0]))
 
         if operation == "get_successor":
             # print("getting successor")
@@ -100,7 +100,7 @@ class HandleNode(object):
         key_val pair in its data_store
         '''
         id_of_key = self.node.hash(str(key))
-        succ = self.node.find_successor(id_of_key)
+        succ = self.find_successor(id_of_key)
         # print("Succ found for inserting key" , id_of_key , succ)
         ip,port = self.getIpPort(succ)
         self.requestHandler.send_message(ip,port,"insert_server|" + str(key) + ":" + str(value) )
@@ -113,7 +113,7 @@ class HandleNode(object):
         pair in its data_store.
         '''
         id_of_key = self.node.hash(str(key))
-        succ = self.node.find_successor(id_of_key)
+        succ = self.find_successor(id_of_key)
         # print("Succ found for deleting key" , id_of_key , succ)
         ip,port = self.getIpPort(succ)
         self.requestHandler.send_message(ip,port,"delete_server|" + str(key) )
@@ -127,7 +127,7 @@ class HandleNode(object):
         corresponding to that key.
         '''
         id_of_key = self.node.hash(str(key))
-        succ = self.node.find_successor(id_of_key)
+        succ = self.find_successor(id_of_key)
         # print("Succ found for searching key" , id_of_key , succ)
         ip,port = self.getIpPort(succ)
         data = self.requestHandler.send_message(ip,port,"search_server|" + str(key) )
@@ -138,8 +138,8 @@ class HandleNode(object):
         '''
         Recevies notification from stabilized function when there is change in successor
         '''
-        if self.predecessor is not None:
-            if self.getBackwardDistance(node_id) < self.getBackwardDistance(self.predecessor.id):
+        if self.node.predecessor is not None:
+            if self.getBackwardDistance(node_id) < self.getBackwardDistance(self.node.predecessor.id):
                 # print("someone notified me")
                 # print("changing my pred", node_id)
                 self.node.predecessor = Node(node_ip,int(node_port))
@@ -156,7 +156,7 @@ class HandleNode(object):
 
     def join_request_from_other_node(self, node_id):
         """ will return successor for the node who is requesting to join """
-        return self.node.find_successor(node_id)
+        return self.find_successor(node_id)
 
 
     def serve_requests(self, conn, addr):
@@ -185,7 +185,7 @@ class HandleNode(object):
         smaller than its id from its successor.
         '''
 
-        data = 'join_request|' + str(self.id)
+        data = 'join_request|' + str(self.node.id)
         succ = self.requestHandler.send_message(node_ip,node_port,data)
         ip,port = self.getIpPort(succ)
         self.node.successor = Node(ip,port)
@@ -200,7 +200,49 @@ class HandleNode(object):
                     # print(key_value.split('|'))
                     self.node.dataStore.data[key_value.split('|')[0]] = key_value.split('|')[1]
 
+    def find_predecessor(self, search_id):
+        
+        if search_id == self.node.id:
+            return str(self.node)
+        # print("finding pred for id ", search_id)
+        if self.node.predecessor is not None and  self.node.successor.id == self.node.id:
+            return self.node.__str__()
+        if self.getForwardDistance(self.node.successor.id) > self.getForwardDistance(search_id):
+            return self.node.__str__()
+        else:
+            new_node_hop = self.closest_preceding_node(search_id)
+            # print("new node hop finding hops in find predecessor" , new_node_hop.nodeinfo.__str__() )
+            if new_node_hop is None:
+                return "None"
+            ip, port = self.getIpPort(new_node_hop.__str__())
+            if ip == self.node.ip and port == self.node.port:
+                return self.node.__str__()
+            data = self.requestHandler.send_message(ip , port, "find_predecessor|"+str(search_id))
+            return data
 
+    def find_successor(self, search_id):
+        
+        if(search_id == self.node.id):
+            return str(self.node)
+        predecessor = self.find_predecessor(search_id)
+        if(predecessor == "None"):
+            return "None"
+        ip,port = self.getIpPort(predecessor)
+        data = self.requestHandler.send_message(ip , port, "get_successor")
+        return data
+    
+    def closest_preceding_node(self, search_id):
+        closest_node = None
+        min_distance = pow(2,self.m)+1
+        for i in list(reversed(range(self.m))):
+            # print("checking hops" ,i ,self.finger_table.table[i][1])
+            if  self.node.fingerTable.table[i][1] is not None and self.getForwardDistance2nodes(self.node.fingerTable.table[i][1].id,search_id) < min_distance  :
+                closest_node = self.node.fingerTable.table[i][1]
+                min_distance = self.getForwardDistance2nodes(self.node.fingerTable.table[i][1].id,search_id)
+                # print("Min distance",min_distance)
+
+        return closest_node
+    
     def match(self,node):
         return node.ip == self.node.ip  and self.node.port == node.port
     
@@ -215,7 +257,7 @@ class HandleNode(object):
         
         if(self.node.id > node):
             return self.node.id - node
-        elif self.id == node:
+        elif self.node.id == node:
             return 0
         return pow(2,self.m) - abs(self.node.id - node)
         
@@ -284,17 +326,13 @@ class HandleNode(object):
 
 
     def send_keys(self, id_of_joining_node):
-            '''
-            The send_keys function is used to send all the keys less than equal to the id_of_joining_node to the new node that
-            has joined the chord ring.
-            '''
-            # print(id_of_joining_node , "Asking for keys")
+
             data = ""
             keys_to_be_removed = []
-            for keys in self.data_store.data:
+            for keys in self.node.dataStore.data:
                 key_id = self.node.hash(str(keys))
                 if self.getForwardDistance2nodes(key_id , id_of_joining_node) < self.getForwardDistance2nodes(key_id,self.id):
-                    data += str(keys) + "|" + str(self.data_store.data[keys]) + ":"
+                    data += str(keys) + "|" + str(self.node.dataStore.data[keys]) + ":"
                     keys_to_be_removed.append(keys)
             for keys in keys_to_be_removed:
                 self.node.dataStore.data.pop(keys)
@@ -307,7 +345,7 @@ class HandleNode(object):
 
             random_index = random.randint(1,self.m-1)
             finger = self.node.fingerTable.table[random_index][0]
-            data = self.node.find_predecessor(finger)
+            data = self.find_predecessor(finger)
             if data == "None":
                 time.sleep(10)
                 continue

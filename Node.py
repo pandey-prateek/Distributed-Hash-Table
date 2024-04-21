@@ -19,24 +19,7 @@ class Node(object):
         return digest
         
     def __str__(self):
-        return str({"ip":self.ip,"port":self.port})
-
-    def find_successor(self, id):
-        p = self.find_predecessor(id)
-        return p.successor
-    
-    def find_predecessor(self, id):
-        n = self.id
-        while not(n < id <= n.successor):
-            n = self.closest_preceding_finger(id)
-        return n
-    
-    def closest_preceding_finger(self, id):
-        for i in range(self.m, 0, -1):
-            n = self.fingerTable.table[i-1][1]
-            if self.id < n.id < id:
-                return n
-        return self
+        return str(self.ip+"|"+str(self.port))
 
     def get_successor(self):
         '''
