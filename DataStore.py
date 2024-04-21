@@ -1,3 +1,4 @@
+from prettytable import PrettyTable
 class DataStore(object):
     
     def __init__(self) -> None:
@@ -11,3 +12,9 @@ class DataStore(object):
         if key in self.data:
             return self.data[key]
         return None
+    def printdataStore(self):
+        t = PrettyTable(['Key', 'Value'])
+        t.title="Data Store"
+        for key,value in self.data.items():
+            t.add_row([key,value])
+        print(t)

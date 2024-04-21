@@ -5,6 +5,7 @@ import random
 import threading
 import socket
 import sys
+from prettytable import PrettyTable
 
 class HandleNode(object):
     
@@ -288,7 +289,7 @@ class HandleNode(object):
         
         while True:
             if (self.node.successor is None ) or self.match(self.node.successor):
-                time.sleep(10)
+                time.sleep(5)
                 continue
             data = "get_predecessor"
             result = self.requestHandler.send_message(self.node.successor.ip , self.node.successor.port , data)
@@ -299,30 +300,38 @@ class HandleNode(object):
             ip , port = self.getIpPort(result)
             result = int(self.requestHandler.send_message(ip,port,"get_id"))
             if self.getBackwardDistance(result) > self.getBackwardDistance(self.node.successor.id):
-                self.successor = Node(ip,port)
+                self.node.successor = Node(ip,port)
                 self.node.fingerTable.table[0][1] = self.node.successor
             self.requestHandler.send_message(self.node.successor.ip , self.node.successor.port, "notify|"+ str(self.node.id) + "|" + self.node.__str__())
-            print("===============================================")
-            print("STABILIZING")
-            print("===============================================")
-            print("ID: ", self.node.id)
+            # print("===============================================")
+            # print("==============  STABILIZING  ==================")
+            # print("===============================================")
+            t = PrettyTable(['ID','Value'])
+            t.title="STABILIZING"
+            t.add_row(["Node iD: ", self.node.id])
             if self.node.successor is not None:
-                print("Successor ID: " , self.node.successor.id)
+                t.add_row(["Successor ID: ", self.node.successor.id])
+            else:
+                t.add_row(["Successor ID: ", None])
             if self.node.predecessor is not None:
-                print("predecessor ID: " , self.node.predecessor.id)
-            print("===============================================")
-            print("=============== FINGER TABLE ==================")
+                t.add_row(["Predecessor ID: ", self.node.predecessor.id])
+            else:
+                t.add_row(["Predecessor ID: ", None])
+            print(t)
+            # print("===============================================")
+            # print("=============== FINGER TABLE ==================")
             self.node.fingerTable.get_entry()
-            print("===============================================")
-            print("DATA STORE")
-            print("===============================================")
+            # print("===============================================")
+            # print("DATA STORE")
+            # print("===============================================")
+            self.node.dataStore.printdataStore()
             print(str(self.node.dataStore.data))
-            print("===============================================")
-            print("+++++++++++++++ END +++++++++++++++++++++++++++")
+            # print("===============================================")
+            # print("+++++++++++++++ END +++++++++++++++++++++++++++")
             print()
             print()
             print()
-            time.sleep(10)
+            time.sleep(5)
 
 
     def send_keys(self, id_of_joining_node):
@@ -345,13 +354,13 @@ class HandleNode(object):
 
             random_index = random.randint(1,self.m-1)
             finger = self.node.fingerTable.table[random_index][0]
-            data = self.find_predecessor(finger)
+            data = self.find_successor(finger)
             if data == "None":
-                time.sleep(10)
+                time.sleep(5)
                 continue
             ip,port = self.getIpPort(data)
             self.node.fingerTable.table[random_index][1] = Node(ip,port) 
-            time.sleep(10)
+            time.sleep(5)
 
 
     def start(self):
