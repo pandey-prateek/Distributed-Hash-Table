@@ -11,7 +11,7 @@ class Node(object):
         self.m=m
         self.id = self.hash(self.__str__())
         self.dataStore=DataStore()
-        self.fingerTable = FingerTable(self.id)
+        self.fingerTable = FingerTable(self.id,self)
         
     def hash(self,message):
         digest=hashlib.sha256(message.encode()).hexdigest()
@@ -44,3 +44,4 @@ class Node(object):
 
         '''
         return str(self.id)
+    

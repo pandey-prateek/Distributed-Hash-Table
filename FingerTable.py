@@ -1,7 +1,7 @@
 from prettytable import PrettyTable
 class FingerTable(object):
-    def __init__(self,id,m=7) -> None:
-        self.table=[[(id+pow(2,i))%pow(2,m),None] for i in range(m)]
+    def __init__(self,id,node,m=7) -> None:
+        self.table=[[(id+pow(2,i))%pow(2,m),node] for i in range(m)]
     def get_entry(self):
         t = PrettyTable(['Entry', 'Interval start','Successor'])
         t.title="FINGER TABLE"

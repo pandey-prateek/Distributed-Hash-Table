@@ -229,6 +229,7 @@ class HandleNode(object):
         if(predecessor == "None"):
             return "None"
         ip,port = self.getIpPort(predecessor)
+        print(ip,port)
         data = self.requestHandler.send_message(ip , port, "get_successor")
         return data
     
@@ -251,6 +252,7 @@ class HandleNode(object):
 
     def getIpPort(self,msg):
         msg=msg.strip().split('|')
+        print(msg,".......................................")
         return msg[0] , int(msg[1])    
     
 
@@ -289,7 +291,7 @@ class HandleNode(object):
         
         while True:
             if (self.node.successor is None ) or self.match(self.node.successor):
-                time.sleep(5)
+                time.sleep(10)
                 continue
             data = "get_predecessor"
             result = self.requestHandler.send_message(self.node.successor.ip , self.node.successor.port , data)
@@ -325,13 +327,13 @@ class HandleNode(object):
             # print("DATA STORE")
             # print("===============================================")
             self.node.dataStore.printdataStore()
-            print(str(self.node.dataStore.data))
+            # print(str(self.node.dataStore.data))
             # print("===============================================")
             # print("+++++++++++++++ END +++++++++++++++++++++++++++")
             print()
             print()
             print()
-            time.sleep(5)
+            time.sleep(10)
 
 
     def send_keys(self, id_of_joining_node):
@@ -356,11 +358,11 @@ class HandleNode(object):
             finger = self.node.fingerTable.table[random_index][0]
             data = self.find_successor(finger)
             if data == "None":
-                time.sleep(5)
+                time.sleep(10)
                 continue
             ip,port = self.getIpPort(data)
             self.node.fingerTable.table[random_index][1] = Node(ip,port) 
-            time.sleep(5)
+            time.sleep(10)
 
 
     def start(self):
