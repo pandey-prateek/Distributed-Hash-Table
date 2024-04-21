@@ -22,26 +22,15 @@ class Node(object):
         return str(self.ip+"|"+str(self.port))
 
     def get_successor(self):
-        '''
-        This function is used to return the successor of the node
-        '''
         if self.successor is None:
             return "None"
         return self.successor.__str__()
     
     def get_predecessor(self):
-        '''
-        This function is used to return the predecessor of the node
-
-        '''
         if self.predecessor is None:
             return "None"
         return self.predecessor.__str__()
     
     def get_id(self):
-        '''
-        This function is used to return the id of the node
-
-        '''
         return str(self.id)
     
